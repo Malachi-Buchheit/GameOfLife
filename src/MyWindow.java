@@ -17,9 +17,9 @@ public class MyWindow {
         frame.add(canvas);
         frame.pack();
         frame.setFocusable(true);
-        canvas.createBufferStrategy(2);
         canvas.addKeyListener(new MyKeyListener());
         canvas.addMouseListener(new MyMouseListener());
+        canvas.createBufferStrategy(2);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
@@ -46,11 +46,34 @@ public class MyWindow {
                     g.dispose();
                 }
             }
+            synchronized (window) {
+                if (GameOfLife.getCopy() != null) {
+                    for (int y = 0; y < GameOfLife.getCopy().length; y++) {
+                        for (int x = 0; x < GameOfLife.getCopy()[0].length; x++) {
+                            g = (Graphics2D) bs.getDrawGraphics();
+                            if (GameOfLife.getCopy()[y][x])
+                                g.setColor(Color.blue);
+                            else
+                                g.setColor(Color.lightGray);
+                            g.fillRect((x + canvas.getMousePosition().x / scale) * scale + 1, (y + canvas.getMousePosition().y / scale) * scale + 1, scale - 2, scale - 2);
+                            g.dispose();
+                        }
+                    }
+                }
+            }
             bs.show();
             if(timeNow > timeThen + 100) {
                 timeThen = timeNow;
                 GameOfLife.update();
             }
         }
+    }
+
+    public static int getMouseXGrid() {
+        return window.canvas.getMousePosition().x/MyWindow.scale;
+    }
+
+    public static int getMouseYGrid() {
+        return window.canvas.getMousePosition().y/MyWindow.scale;
     }
 }

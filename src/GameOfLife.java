@@ -7,32 +7,77 @@ public class GameOfLife {
     static int width = 100;
     static int height = 100;
     static boolean[][] grid = new boolean[height][width];
-    static boolean[][] copy;
+    private static boolean[][] copy = null;
+
+    public static void pasteCopy() {
+        synchronized (MyWindow.window) {
+            for (int y = 0; y < copy.length; y++) {
+                for (int x = 0; x < copy[0].length; x++) {
+                    grid[y + MyWindow.getMouseYGrid()][x + MyWindow.getMouseXGrid()] = copy[y][x];
+                }
+            }
+        }
+    }
+
+    public static void rotateCopy(boolean right) {
+        synchronized (MyWindow.window) {
+            boolean[][] out = new boolean[copy[0].length][copy.length];
+            for (int y = 0; y < copy.length; y++) {
+                for (int x = 0; x < copy[0].length; x++) {
+                    if(right)
+                        out[x][y] = copy[copy.length-1-y][x];
+                    else
+                        out[x][y] = copy[y][copy[0].length-1-x];
+                }
+            }
+            copy = out;
+        }
+    }
+
+    public static void clearCopy() {
+        synchronized (MyWindow.window) {
+            copy = null;
+        }
+    }
+
+    public static boolean[][] getCopy() {
+        synchronized (MyWindow.window) {
+            return copy;
+        }
+    }
 
     public static void loadCopy(String file) {
-        boolean[][] buff = new boolean[0][0];
-        int w = 0;
-        int h = 0;
-        try {
-            Scanner scan = new Scanner(new File(file));
-            char alive = 'O';
-            StringBuilder str = new StringBuilder();
-            while(scan.hasNext()) {
-                str.append(scan.nextLine()).append("\n");
-                h++;
-            }
-            scan.close();
+        synchronized (MyWindow.window) {
+            boolean[][] buff = new boolean[0][0];
+            int w = 0;
+            int h = 0;
+            try {
+                Scanner scan = new Scanner(new File(file));
+                char alive = 'o';
+                StringBuilder str = new StringBuilder();
+                while (scan.hasNext()) {
+                    str.append(scan.nextLine()).append("\n");
+                    h++;
+                }
+                scan.close();
 
-            while(str.charAt(w) != '\n') w++;
-            buff = new boolean[h][--w];
+                while (str.charAt(w) != '\n') w++;
+                buff = new boolean[h][w];
+                System.out.println(w++ + "x" + h + " = " + (str.length() - h));
 
-            for(int i = 0; i < str.length(); i++) {
-                buff[i/h][i%h] = str.charAt(i) == alive;
+                for (int i = 0; i < str.length(); i++) {
+                    if (str.charAt(i) != '\n') {
+                        System.out.print(str.charAt(i) == alive ? "o" : ".");
+                        buff[i / w][i % w] = str.charAt(i) == alive;
+                    } else {
+                        System.out.println();
+                    }
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            copy = buff;
         }
-        copy = buff;
     }
 
     public static void clear() {

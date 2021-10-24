@@ -7,7 +7,13 @@ public class MyMouseListener implements MouseListener {
     public void mouseClicked(MouseEvent e) {
         if(e.getButton() == MouseEvent.BUTTON1) {
             GameOfLife.paused = true;
-            GameOfLife.toggle(e.getX()/MyWindow.scale, e.getY()/MyWindow.scale);
+            if(GameOfLife.getCopy() == null) {
+                GameOfLife.toggle(e.getX() / MyWindow.scale, e.getY() / MyWindow.scale);
+            } else {
+                GameOfLife.pasteCopy();
+                if(!MyKeyListener.shift)
+                    GameOfLife.clearCopy();
+            }
         } else if(e.getButton() == MouseEvent.BUTTON3) {
             GameOfLife.paused = !GameOfLife.paused;
         }
